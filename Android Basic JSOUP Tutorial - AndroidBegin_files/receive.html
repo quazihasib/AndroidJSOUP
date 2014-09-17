@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><meta charset="utf-8">
+<title></title>
+</head><body>
+
+<script src="receive_data/jq.js"></script>
+<script src="receive_data/post.js"></script>
+<script>
+(function() {
+	var endpoints = {
+		add: "\/sitecart\/addtocart",
+		remove: "\/sitecart\/removefromcart"	};
+	Post.to("*");
+	Post.receive(function(data) {
+		if (data.add) {
+			var url = endpoints.add + "/site/" + data.add.site + (data.add.cart ? "/cart/" + data.add.cart : "");
+			$.post(url, { zone: data.add.zone }, function(response) {
+				if (response.cart)
+					Post.cart(response.cart);
+				else
+					Post.showcart();
+				if (response.soldout)
+					Post.soldoutzone(response.soldout);
+			});
+		}
+		if (data.remove) {
+			$.post(endpoints.remove + "/site/" + data.remove.site + "/cart/" + data.remove.cart, { ad: data.remove.ad }, function(response) {
+				if (response.cart)
+					Post.cart(response.cart);
+			});
+		}
+	});
+})();
+</script>
+</body></html>
